@@ -34,7 +34,7 @@ export class TransactionController {
     return await this.addTransactionUsecaseproxy.getInstance().execute(body.text, body.groupId, req.user);
   }
 
-  @HasRoles(Role.SUPPORTDESK, Role.USER)
+  @HasRoles(Role.SUPPORTDESK, Role.USER, Role.ADMIN, Role.SUPERADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
   async getTransactions(@Req() req: any, @Query('userId') userId?: string, @Query('groupId') groupId?: string) {
@@ -46,7 +46,7 @@ export class TransactionController {
       }
     }
 
-    return await this.getTransactionsUsecaseProxy.getInstance().execute(userId, groupId);
+    return await this.getTransactionsUsecaseProxy.getInstance().execute(req.user, userId, groupId);
   }
 
   @HasRoles(Role.SUPPORTDESK, Role.USER)

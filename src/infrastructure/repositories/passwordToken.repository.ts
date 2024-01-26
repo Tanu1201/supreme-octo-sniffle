@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PasswordTokenRepository } from 'src/domain/repositories/passwordTokenRepository.interface';
-import { PasswordToken } from '../entities/passwordToken.entity';
-import { Repository } from 'typeorm';
 import { PasswordTokenM } from 'src/domain/model/passwordToken';
+import { PasswordTokenRepository } from 'src/domain/repositories/passwordTokenRepository.interface';
+import { Repository } from 'typeorm';
+import { PasswordToken } from '../entities/passwordToken.entity';
 
 @Injectable()
 export class DatabasePasswordTokenRepository implements PasswordTokenRepository {
@@ -23,7 +23,7 @@ export class DatabasePasswordTokenRepository implements PasswordTokenRepository 
     if (!token) {
       throw new Error('Link expired or invalid');
     }
-    return;
+    return token;
   }
 
   async deletePasswordToken(id: string): Promise<void> {

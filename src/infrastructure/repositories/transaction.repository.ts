@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Role } from 'src/domain/model/role.enum';
 import { TransactionM } from 'src/domain/model/transaction';
 import { UserM } from 'src/domain/model/user';
 import { TransactionRepository } from 'src/domain/repositories/transactionRepository.interface';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { Group } from '../entities/group.entity';
 import { Transaction } from '../entities/transaction.entity';
 import { UserGroup } from '../entities/userGroup.entity';
 
@@ -14,6 +16,8 @@ export class DatabaseTransactionRepository implements TransactionRepository {
     private readonly transactionEntityRepository: Repository<Transaction>,
     @InjectRepository(UserGroup)
     private readonly userGroupEntityRepository: Repository<UserGroup>,
+    @InjectRepository(Group)
+    private readonly groupEntityRepository: Repository<Group>,
   ) {}
 
   async createTransaction(text: string, groupId: string, user: UserM): Promise<TransactionM> {
@@ -37,12 +41,22 @@ export class DatabaseTransactionRepository implements TransactionRepository {
       .save();
   }
 
-  async getTransactions(userId?: string, groupId?: string): Promise<TransactionM[]> {
-    console.log({ userId, groupId });
+  async getTransactions(user: UserM, userId?: string, groupId?: string): Promise<TransactionM[]> {
+    const groupIds =
+      user.role === Role.ADMIN
+        ? await this.groupEntityRepository.find({
+            where: { adminId: user.id },
+          })
+        : [];
+    if (groupId && user.role === Role.ADMIN) {
+      if (!groupIds.find((group) => group.id === groupId)) {
+        throw new Error('You are not admin of this group!');
+      }
+    }
     return await this.transactionEntityRepository.find({
       where: {
         ...(userId && { userId }),
-        ...(groupId && { groupId }),
+        ...(groupId ? { groupId } : user.role === Role.ADMIN ? { groupId: In(groupIds.map((group) => group.id)) } : {}),
       },
     });
   }

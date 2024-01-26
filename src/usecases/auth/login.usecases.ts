@@ -79,6 +79,7 @@ export class LoginUseCases {
 
   async setPassword(token: string, password: string) {
     const passwordToken = await this.passwordTokenRepository.getPasswordTokenById(token);
+    console.log(passwordToken);
     if (!passwordToken) {
       return null;
     }
@@ -86,6 +87,7 @@ export class LoginUseCases {
       return null;
     }
     const user = await this.userRepository.getUserById(passwordToken.userId);
+    console.log(user);
     if (!user) {
       return null;
     }

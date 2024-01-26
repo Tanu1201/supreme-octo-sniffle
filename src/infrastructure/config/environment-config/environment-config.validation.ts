@@ -1,5 +1,5 @@
 import { plainToClass } from 'class-transformer';
-import { IsBoolean, IsEnum, IsNumber, IsString, validateSync } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
 
 enum Environment {
   Development = 'development',
@@ -21,14 +21,13 @@ class EnvironmentVariables {
   @IsString()
   JWT_REFRESH_TOKEN_EXPIRATION_TIME: string;
 
-
   @IsString()
   DATABASE_HOST: string;
   @IsNumber()
   DATABASE_PORT: number;
   @IsString()
   DATABASE_USER: string;
-  @IsString()
+  @IsOptional()
   DATABASE_PASSWORD: string;
   @IsString()
   DATABASE_NAME: string;

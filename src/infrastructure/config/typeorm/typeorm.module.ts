@@ -19,9 +19,6 @@ export const getTypeOrmModuleOptions = (config: EnvironmentConfigService): TypeO
     cli: {
       migrationsDir: 'database/migrations',
     },
-    // ssl: {
-    //   rejectUnauthorized: false,
-    // },
   } as TypeOrmModuleOptions);
 
 @Module({

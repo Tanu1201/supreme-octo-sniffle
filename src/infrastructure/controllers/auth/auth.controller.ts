@@ -4,17 +4,17 @@ import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiResponse, ApiT
 import { AuthLoginDto, AuthSetPasswordDto } from './auth-dto.class';
 import { IsAuthPresenter } from './auth.presenter';
 
-import JwtRefreshGuard from '../../common/guards/jwtRefresh.guard';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
+import JwtRefreshGuard from '../../common/guards/jwtRefresh.guard';
 
+import { IsAuthenticatedUseCases } from '../../../usecases/auth/isAuthenticated.usecases';
+import { LoginUseCases } from '../../../usecases/auth/login.usecases';
+import { LogoutUseCases } from '../../../usecases/auth/logout.usecases';
 import { UseCaseProxy } from '../../usecases-proxy/usecases-proxy';
 import { UsecasesProxyModule } from '../../usecases-proxy/usecases-proxy.module';
-import { LoginUseCases } from '../../../usecases/auth/login.usecases';
-import { IsAuthenticatedUseCases } from '../../../usecases/auth/isAuthenticated.usecases';
-import { LogoutUseCases } from '../../../usecases/auth/logout.usecases';
 
-import { ApiResponseType } from '../../common/swagger/response.decorator';
 import { LoginGuard } from 'src/infrastructure/common/guards/login.guard';
+import { ApiResponseType } from '../../common/swagger/response.decorator';
 
 @Controller('auth')
 @ApiTags('auth')

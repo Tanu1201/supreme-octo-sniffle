@@ -6,11 +6,11 @@ import { HasRoles } from 'src/infrastructure/common/roles/roles.decorator';
 import { UseCaseProxy } from 'src/infrastructure/usecases-proxy/usecases-proxy';
 import { UsecasesProxyModule } from 'src/infrastructure/usecases-proxy/usecases-proxy.module';
 import { AddGroupUseCases } from 'src/usecases/group/addGroup.usecases';
+import { AddGroupUserUseCases } from 'src/usecases/group/addGroupUser.usecases';
+import { EditGroupAdminUseCases } from 'src/usecases/group/editGroup.usecases';
 import { GetGroupUseCases } from 'src/usecases/group/getGroup.usecases';
 import { GetGroupsUseCases } from 'src/usecases/group/getGroups.usecases';
 import { AddGroupUserDto, CreateGroupDto, EditGroupAdminDto } from './group.dto';
-import { EditGroupAdminUseCases } from 'src/usecases/group/editGroup.usecases';
-import { AddGroupUserUseCases } from 'src/usecases/group/addGroupUser.usecases';
 
 @Controller('groups')
 export class GroupController {
@@ -54,7 +54,7 @@ export class GroupController {
     return await this.editGroupAdminUsecaseProxy.getInstance().execute(id, body.adminId);
   }
 
-  @HasRoles(Role.ADMIN)
+  @HasRoles(Role.ADMIN, Role.SUPERADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('users')
   async addUserToGroup(@Body() body: AddGroupUserDto, @Req() req: any) {
