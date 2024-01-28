@@ -7,39 +7,52 @@ import { ExceptionsModule } from '../exceptions/exceptions.module';
 import { LoggerModule } from '../logger/logger.module';
 import { LoggerService } from '../logger/logger.service';
 
+import { RepositoriesModule } from '../repositories/repositories.module';
 import { BcryptModule } from '../services/bcrypt/bcrypt.module';
 import { BcryptService } from '../services/bcrypt/bcrypt.service';
 import { JwtModule } from '../services/jwt/jwt.module';
 import { JwtTokenService } from '../services/jwt/jwt.service';
-import { RepositoriesModule } from '../repositories/repositories.module';
 
 import { DatabaseUserRepository } from '../repositories/user.repository';
 
-import { EnvironmentConfigModule } from '../config/environment-config/environment-config.module';
-import { EnvironmentConfigService } from '../config/environment-config/environment-config.service';
-import { UseCaseProxy } from './usecases-proxy';
-import { GetUserUseCases } from 'src/usecases/users/getUser.usecases';
-import { AddUserUseCases } from 'src/usecases/users/addUser.usecases';
-import { MailService } from '../config/mail/mail.service';
-import { MailModule } from '../config/mail/mail.module';
-import { DatabasePasswordTokenRepository } from '../repositories/passwordToken.repository';
-import { GetUsersUseCases } from 'src/usecases/users/getUsers.usecases';
-import { DatabaseGroupRepository } from '../repositories/group.repository';
-import { AddGroupUseCases } from 'src/usecases/group/addGroup.usecases';
-import { GetGroupsUseCases } from 'src/usecases/group/getGroups.usecases';
-import { GetGroupUseCases } from 'src/usecases/group/getGroup.usecases';
-import { EditGroupAdminUseCases } from 'src/usecases/group/editGroup.usecases';
-import { AddGroupUserUseCases } from 'src/usecases/group/addGroupUser.usecases';
-import { DatabaseTransactionRepository } from '../repositories/transaction.repository';
 import { TransactionRepository } from 'src/domain/repositories/transactionRepository.interface';
+import { AddGroupUseCases } from 'src/usecases/group/addGroup.usecases';
+import { AddGroupUserUseCases } from 'src/usecases/group/addGroupUser.usecases';
+import { EditGroupAdminUseCases } from 'src/usecases/group/editGroup.usecases';
+import { GetGroupUseCases } from 'src/usecases/group/getGroup.usecases';
+import { GetGroupsUseCases } from 'src/usecases/group/getGroups.usecases';
+import { AddTransactionUseCases } from 'src/usecases/transaction/addTransaction.usecases';
+import { DeleteTransactionUseCases } from 'src/usecases/transaction/deleteTransaction.usecases';
 import { GetTransactionUseCases } from 'src/usecases/transaction/getTransaction.usecases';
 import { GetTransactionsUseCases } from 'src/usecases/transaction/getTransactions.usecases';
-import { AddTransactionUseCases } from 'src/usecases/transaction/addTransaction.usecases';
 import { UpdateTransactionUseCases } from 'src/usecases/transaction/updateTransaction.usecases';
-import { DeleteTransactionUseCases } from 'src/usecases/transaction/deleteTransaction.usecases';
+import { AddUserUseCases } from 'src/usecases/users/addUser.usecases';
+import { DeleteUserUseCases } from 'src/usecases/users/deleteUser.usecases';
+import { GetUserUseCases } from 'src/usecases/users/getUser.usecases';
+import { GetUsersUseCases } from 'src/usecases/users/getUsers.usecases';
+import { EnvironmentConfigModule } from '../config/environment-config/environment-config.module';
+import { EnvironmentConfigService } from '../config/environment-config/environment-config.service';
+import { MailModule } from '../config/mail/mail.module';
+import { MailService } from '../config/mail/mail.service';
+import { DatabaseGroupRepository } from '../repositories/group.repository';
+import { DatabasePasswordTokenRepository } from '../repositories/passwordToken.repository';
+import { DatabaseTransactionRepository } from '../repositories/transaction.repository';
+import { DatabaseZohoTokenRepository } from '../repositories/zohoToken.repository';
+import { ZohoSignServiceModule } from '../services/zohoSign/zohoSign.module';
+import { ZohoSignService } from '../services/zohoSign/zohoSign.service';
+import { UseCaseProxy } from './usecases-proxy';
 
 @Module({
-  imports: [LoggerModule, JwtModule, BcryptModule, EnvironmentConfigModule, RepositoriesModule, ExceptionsModule, MailModule],
+  imports: [
+    LoggerModule,
+    JwtModule,
+    BcryptModule,
+    EnvironmentConfigModule,
+    RepositoriesModule,
+    ExceptionsModule,
+    MailModule,
+    ZohoSignServiceModule,
+  ],
 })
 export class UsecasesProxyModule {
   // Auth
@@ -51,6 +64,7 @@ export class UsecasesProxyModule {
   static GET_USER_USECASES_PROXY = 'getUserUsecasesProxy';
   static GET_USERS_USECASES_PROXY = 'getUsersUsecasesProxy';
   static POST_USER_USECASES_PROXY = 'postUserUsecasesProxy';
+  static Delete_USER_USECASES_PROXY = 'deleteUserProxy';
 
   // Group
   static GET_GROUP_USECASES_PROXY = 'getGroupUsecasesProxy';
@@ -109,6 +123,11 @@ export class UsecasesProxyModule {
         },
         {
           inject: [DatabaseUserRepository],
+          provide: UsecasesProxyModule.Delete_USER_USECASES_PROXY,
+          useFactory: (userRepository: DatabaseUserRepository) => new UseCaseProxy(new DeleteUserUseCases(userRepository)),
+        },
+        {
+          inject: [DatabaseUserRepository],
           provide: UsecasesProxyModule.GET_USERS_USECASES_PROXY,
           useFactory: (userRepository: DatabaseUserRepository) => new UseCaseProxy(new GetUsersUseCases(userRepository)),
         },
@@ -160,21 +179,25 @@ export class UsecasesProxyModule {
             new UseCaseProxy(new GetTransactionsUseCases(transactionRepository)),
         },
         {
-          inject: [DatabaseTransactionRepository],
+          inject: [DatabaseTransactionRepository, DatabaseZohoTokenRepository, ZohoSignService, EnvironmentConfigService],
           provide: UsecasesProxyModule.POST_TRANSACTION_USECASES_PROXY,
-          useFactory: (transactionRepository: TransactionRepository) =>
-            new UseCaseProxy(new AddTransactionUseCases(transactionRepository)),
+          useFactory: (
+            transactionRepository: DatabaseTransactionRepository,
+            zohoTokenRepository: DatabaseZohoTokenRepository,
+            zohoSignService: ZohoSignService,
+            config: EnvironmentConfigService,
+          ) => new UseCaseProxy(new AddTransactionUseCases(transactionRepository, zohoTokenRepository, zohoSignService, config)),
         },
         {
           inject: [DatabaseTransactionRepository],
           provide: UsecasesProxyModule.EDIT_TRANSACTION_USECASES_PROXY,
-          useFactory: (transactionRepository: TransactionRepository) =>
+          useFactory: (transactionRepository: DatabaseTransactionRepository) =>
             new UseCaseProxy(new UpdateTransactionUseCases(transactionRepository)),
         },
         {
           inject: [DatabaseTransactionRepository],
           provide: UsecasesProxyModule.DELETE_TRANSACTION_USECASES_PROXY,
-          useFactory: (transactionRepository: TransactionRepository) =>
+          useFactory: (transactionRepository: DatabaseTransactionRepository) =>
             new UseCaseProxy(new DeleteTransactionUseCases(transactionRepository)),
         },
       ],
@@ -195,6 +218,7 @@ export class UsecasesProxyModule {
         UsecasesProxyModule.POST_TRANSACTION_USECASES_PROXY,
         UsecasesProxyModule.EDIT_TRANSACTION_USECASES_PROXY,
         UsecasesProxyModule.DELETE_TRANSACTION_USECASES_PROXY,
+        UsecasesProxyModule.Delete_USER_USECASES_PROXY,
       ],
     };
   }

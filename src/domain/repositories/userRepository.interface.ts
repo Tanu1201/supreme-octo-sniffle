@@ -7,4 +7,5 @@ export interface UserRepository {
   getUserById(id: string): Promise<UserWithoutPassword>;
   createUser(user: UserM): Promise<UserWithoutPassword>;
   updatePassword(id: string, password: string): Promise<void>;
+  deleteUser(id: string): Promise<boolean>;
 }

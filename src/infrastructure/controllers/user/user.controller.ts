@@ -1,15 +1,15 @@
-import { Body, Controller, Get, Inject, Param, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { Role } from 'src/domain/model/role.enum';
 import { JwtAuthGuard } from 'src/infrastructure/common/guards/jwtAuth.guard';
 import { RolesGuard } from 'src/infrastructure/common/guards/roles.guard';
 import { HasRoles } from 'src/infrastructure/common/roles/roles.decorator';
 import { UseCaseProxy } from 'src/infrastructure/usecases-proxy/usecases-proxy';
 import { UsecasesProxyModule } from 'src/infrastructure/usecases-proxy/usecases-proxy.module';
-import { GetUserUseCases } from 'src/usecases/users/getUser.usecases';
-import { AddUserDto } from './user.dto';
 import { AddUserUseCases } from 'src/usecases/users/addUser.usecases';
+import { DeleteUserUseCases } from 'src/usecases/users/deleteUser.usecases';
+import { GetUserUseCases } from 'src/usecases/users/getUser.usecases';
 import { GetUsersUseCases } from 'src/usecases/users/getUsers.usecases';
+import { AddUserDto } from './user.dto';
 
 @Controller('users')
 export class UserController {
@@ -20,6 +20,8 @@ export class UserController {
     private readonly getUserUsecaseProxy: UseCaseProxy<GetUserUseCases>,
     @Inject(UsecasesProxyModule.POST_USER_USECASES_PROXY)
     private readonly addUserUsecaseProxy: UseCaseProxy<AddUserUseCases>,
+    @Inject(UsecasesProxyModule.Delete_USER_USECASES_PROXY)
+    private readonly deleteUserUsecaseProxy: UseCaseProxy<DeleteUserUseCases>,
   ) {}
 
   @HasRoles(Role.SUPERADMIN, Role.ADMIN, Role.POWERUSER)
@@ -51,5 +53,12 @@ export class UserController {
       throw new Error('You are not allowed to create a user');
     }
     return await this.addUserUsecaseProxy.getInstance().execute({ ...user, createdById: req.user.id });
+  }
+
+  @HasRoles(Role.SUPERADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Delete(':id')
+  async deleteUser(@Req() req: any, @Param('id') id: string) {
+    return await this.deleteUserUsecaseProxy.getInstance().execute(id);
   }
 }

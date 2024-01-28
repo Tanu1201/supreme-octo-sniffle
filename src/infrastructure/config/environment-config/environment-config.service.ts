@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NodemailerConfig } from 'src/domain/config/nodemailer.interface';
+import { ZohoConfig } from 'src/domain/config/zoho.interface';
 import { DatabaseConfig } from '../../../domain/config/database.interface';
 import { JWTConfig } from '../../../domain/config/jwt.interface';
 
 @Injectable()
-export class EnvironmentConfigService implements DatabaseConfig, JWTConfig {
+export class EnvironmentConfigService implements DatabaseConfig, JWTConfig, NodemailerConfig, ZohoConfig {
   constructor(private configService: ConfigService) {}
 
   getJwtSecret(): string {
@@ -69,5 +71,17 @@ export class EnvironmentConfigService implements DatabaseConfig, JWTConfig {
 
   getNodemailerFrom(): string {
     return this.configService.get<string>('NODEMAILER_FROM');
+  }
+
+  getZohoClientId(): string {
+    return this.configService.get<string>('ZOHO_CLIENT_ID');
+  }
+
+  getZohoClientSecret(): string {
+    return this.configService.get<string>('ZOHO_CLIENT_SECRET');
+  }
+
+  getZohoRefreshToken(): string {
+    return this.configService.get<string>('ZOHO_REFRESH_TOKEN');
   }
 }

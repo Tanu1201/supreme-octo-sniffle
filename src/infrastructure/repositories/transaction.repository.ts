@@ -20,7 +20,7 @@ export class DatabaseTransactionRepository implements TransactionRepository {
     private readonly groupEntityRepository: Repository<Group>,
   ) {}
 
-  async createTransaction(text: string, groupId: string, user: UserM): Promise<TransactionM> {
+  async createTransaction(filePath: string, groupId: string, user: UserM): Promise<TransactionM> {
     const groupUser = await this.userGroupEntityRepository.findOne({
       where: {
         groupId: groupId,
@@ -34,8 +34,8 @@ export class DatabaseTransactionRepository implements TransactionRepository {
 
     return await this.transactionEntityRepository
       .create({
-        text: text,
-        groupId: groupId,
+        filePath,
+        groupId,
         userId: user.id,
       })
       .save();
@@ -86,7 +86,7 @@ export class DatabaseTransactionRepository implements TransactionRepository {
       id: transactionId,
       userId: user.id,
     });
-    transaction.text = text;
+    // transaction.text = text;
 
     return await transaction.save();
   }

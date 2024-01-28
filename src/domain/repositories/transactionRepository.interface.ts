@@ -2,7 +2,7 @@ import { TransactionM } from '../model/transaction';
 import { UserM } from '../model/user';
 
 export interface TransactionRepository {
-  createTransaction(text: string, groupId: string, user: UserM): Promise<TransactionM>;
+  createTransaction(filePath: string, groupId: string, user: UserM): Promise<TransactionM>;
 
   getTransactions(user: UserM, userId?: string, groupId?: string): Promise<TransactionM[]>;
 

@@ -1,11 +1,14 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { User } from './user.entity';
 import { Group } from './group.entity';
+import { User } from './user.entity';
 
 @Entity({ name: 'transactions' })
 export class Transaction extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  filePath: string;
 
   @Column({ type: 'uuid' })
   userId: string;
@@ -18,9 +21,6 @@ export class Transaction extends BaseEntity {
 
   @ManyToOne(() => Group, (group) => group.transactions)
   group: Group;
-
-  @Column()
-  text: string;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;

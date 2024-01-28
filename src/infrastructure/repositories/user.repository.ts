@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { UserM, UserWithoutPassword } from '../../domain/model/user';
 import { UserRepository } from '../../domain/repositories/userRepository.interface';
 import { User } from '../entities/user.entity';
-import { IBcryptService } from 'src/domain/adapters/bcrypt.interface';
 
 @Injectable()
 export class DatabaseUserRepository implements UserRepository {
@@ -83,5 +82,15 @@ export class DatabaseUserRepository implements UserRepository {
     adminUser.refreshToken = userEntity.refreshToken;
 
     return adminUser;
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const userDeleted = await this.userEntityRepository.delete(id);
+
+    if (!userDeleted) {
+      throw new Error('User not found');
+    }
+
+    return true;
   }
 }

@@ -1,6 +1,6 @@
 export class TransactionM {
   id?: string;
-  text: string;
+  filePath: string;
   groupId: string;
   userId: string;
   createdAt?: Date;
