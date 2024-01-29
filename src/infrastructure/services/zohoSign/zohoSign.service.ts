@@ -3,6 +3,19 @@ import { IZohoSignService } from 'src/domain/adapters/zohoSign.interface';
 const authUrl = 'https://accounts.zoho.in/oauth/v2/token';
 const baseUrl = 'https://sign.zoho.in/api/v1';
 
+async function readFileAsBlob(filePath) {
+  const fs = require('fs');
+  const util = require('util');
+  const readFile = util.promisify(fs.readFile);
+
+  try {
+    const fileData = await readFile(filePath);
+    return new Blob([fileData]);
+  } catch (error) {
+    throw error;
+  }
+}
+
 export class ZohoSignService implements IZohoSignService {
   async generateNewAccessToken(
     refreshToken: string,
@@ -26,16 +39,18 @@ export class ZohoSignService implements IZohoSignService {
   }
 
   async createDocument(
-    file: any,
+    file: Express.Multer.File,
     name: string,
     email: string,
     accessToken: string,
   ): Promise<{
     requestId: string;
     documentId: string;
+    actionId: string;
   }> {
     const formData = new FormData();
-    formData.append('file', file);
+    const readData = await readFileAsBlob(file.path);
+    formData.append('file', readData, file.originalname);
     formData.append(
       'data',
       JSON.stringify({
@@ -64,16 +79,19 @@ export class ZohoSignService implements IZohoSignService {
       },
       body: formData,
     });
+    const data = await res.json();
     const {
       requests: {
         request_id: requestId,
-        document_fields: [{ document_id: documentId }],
+        document_ids: [{ document_id: documentId }],
+        actions: [{ action_id: actionId }],
       },
-    } = await res.json();
+    } = data;
 
     return {
       requestId,
       documentId,
+      actionId,
     };
   }
 
@@ -159,27 +177,24 @@ export class ZohoSignService implements IZohoSignService {
           request_name: 'test',
           actions: [
             {
-              recipient_name: name,
-              recipient_email: email,
-              in_person_name: name,
+              verify_recipient: false,
+              action_id: actionId,
               action_type: 'SIGN',
               private_notes: 'Testing purpose',
               signing_order: 0,
-              verify_recipient: false,
-              verification_type: 'EMAIL',
               fields: [
                 {
+                  field_type_name: 'Signature',
                   field_name: 'Signature',
                   field_label: 'Signature',
-                  field_type_name: 'Signature',
                   document_id: documentId,
                   action_id: actionId,
                   is_mandatory: true,
                   x_coord: 6,
                   y_coord: 0,
-                  abs_width: 22,
-                  abs_height: 5,
-                  page_no: 1,
+                  abs_width: 200,
+                  abs_height: 20,
+                  page_no: 0,
                   default_value: 'sign here',
                   is_read_only: false,
                   name_format: 'FIRST_NAME',
@@ -187,12 +202,15 @@ export class ZohoSignService implements IZohoSignService {
                   description_tooltip: 'Sign here',
                 },
               ],
+              recipient_name: name,
+              recipient_email: email,
+              // in_person_name: name,
             },
           ],
         },
       }),
     );
-    await fetch(`${baseUrl}/requests/${requestId}/submit`, {
+    const res = await fetch(`${baseUrl}/requests/${requestId}/submit`, {
       method: 'POST',
       headers: {
         Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -200,6 +218,7 @@ export class ZohoSignService implements IZohoSignService {
       },
       body: urlencoded,
     });
+    console.log(await res.json());
     return 'Sent for sign';
   }
 }

@@ -7,6 +7,7 @@ export interface IZohoSignService {
   ): Promise<{
     requestId: string;
     documentId: string;
+    actionId: string;
   }>;
   addSignTag(
     name: string,

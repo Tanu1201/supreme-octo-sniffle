@@ -63,7 +63,7 @@ export class TransactionController {
     @UploadedFile('file')
     file: Express.Multer.File,
   ) {
-    return await this.addTransactionUsecaseproxy.getInstance().execute(file.path, groupId, req.user, name, email);
+    return await this.addTransactionUsecaseproxy.getInstance().execute(file, groupId, req.user, name, email);
   }
 
   @HasRoles(Role.SUPPORTDESK, Role.USER, Role.ADMIN, Role.SUPERADMIN)
