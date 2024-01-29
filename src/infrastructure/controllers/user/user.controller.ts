@@ -24,7 +24,7 @@ export class UserController {
     private readonly deleteUserUsecaseProxy: UseCaseProxy<DeleteUserUseCases>,
   ) {}
 
-  @HasRoles(Role.SUPERADMIN, Role.ADMIN, Role.POWERUSER)
+  @HasRoles(Role.SUPERADMIN, Role.ADMIN, Role.POWERUSER, Role.USER)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
   async getUsers() {

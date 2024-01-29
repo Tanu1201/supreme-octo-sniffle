@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 export class AddTransactionDto {
   @IsNotEmpty()
@@ -6,10 +6,6 @@ export class AddTransactionDto {
   groupId: string;
 
   @IsNotEmpty()
-  @IsString()
-  name: string;
-
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
+  @IsUUID()
+  userId: string;
 }

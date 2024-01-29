@@ -179,14 +179,24 @@ export class UsecasesProxyModule {
             new UseCaseProxy(new GetTransactionsUseCases(transactionRepository)),
         },
         {
-          inject: [DatabaseTransactionRepository, DatabaseZohoTokenRepository, ZohoSignService, EnvironmentConfigService],
+          inject: [
+            DatabaseTransactionRepository,
+            DatabaseZohoTokenRepository,
+            ZohoSignService,
+            EnvironmentConfigService,
+            DatabaseUserRepository,
+          ],
           provide: UsecasesProxyModule.POST_TRANSACTION_USECASES_PROXY,
           useFactory: (
             transactionRepository: DatabaseTransactionRepository,
             zohoTokenRepository: DatabaseZohoTokenRepository,
             zohoSignService: ZohoSignService,
             config: EnvironmentConfigService,
-          ) => new UseCaseProxy(new AddTransactionUseCases(transactionRepository, zohoTokenRepository, zohoSignService, config)),
+            userRepository: DatabaseUserRepository,
+          ) =>
+            new UseCaseProxy(
+              new AddTransactionUseCases(transactionRepository, zohoTokenRepository, zohoSignService, config, userRepository),
+            ),
         },
         {
           inject: [DatabaseTransactionRepository],

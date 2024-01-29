@@ -58,12 +58,12 @@ export class TransactionController {
   )
   @Post()
   async createTransaction(
-    @Body() { groupId, name, email }: AddTransactionDto,
+    @Body() { groupId, userId }: AddTransactionDto,
     @Req() req: any,
     @UploadedFile('file')
     file: Express.Multer.File,
   ) {
-    return await this.addTransactionUsecaseproxy.getInstance().execute(file, groupId, req.user, name, email);
+    return await this.addTransactionUsecaseproxy.getInstance().execute(file, groupId, req.user, userId);
   }
 
   @HasRoles(Role.SUPPORTDESK, Role.USER, Role.ADMIN, Role.SUPERADMIN)

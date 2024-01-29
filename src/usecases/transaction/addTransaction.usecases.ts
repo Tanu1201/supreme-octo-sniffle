@@ -1,6 +1,7 @@
 import { ZohoConfig } from 'src/domain/config/zoho.interface';
 import { UserM } from 'src/domain/model/user';
 import { TransactionRepository } from 'src/domain/repositories/transactionRepository.interface';
+import { UserRepository } from 'src/domain/repositories/userRepository.interface';
 import { ZohoTokenRepository } from 'src/domain/repositories/zohoTokenRepository.interface';
 import { ZohoSignService } from 'src/infrastructure/services/zohoSign/zohoSign.service';
 
@@ -10,12 +11,16 @@ export class AddTransactionUseCases {
     private readonly zohoTokenRepository: ZohoTokenRepository,
     private readonly zohoSignService: ZohoSignService,
     private readonly zohoConfig: ZohoConfig,
+    private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(file: Express.Multer.File, groupId: string, user: UserM, name: string, email: string) {
+  async execute(file: Express.Multer.File, groupId: string, user: UserM, userId: string) {
     if (file.path.split('.').pop() !== 'pdf') {
       throw new Error('File must be a pdf!');
     }
+
+    const { name, email } = await this.userRepository.getUserById(userId);
+
     const transaction = await this.transactionRepository.createTransaction(file.path, groupId, user);
     let accessToken = await this.zohoTokenRepository.getZohoAcessToken();
 
